@@ -320,7 +320,6 @@ class TwoPointLikelihood(GaussianLikelihood):
         # the thing it does want is the theory vector, for comparison with
         # the data vector
         theory = np.concatenate(theory)
-        print(theory)
 
         if self.moped:
             return np.dot(self.moped_transform, theory)

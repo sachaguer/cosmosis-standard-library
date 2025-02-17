@@ -14,3 +14,5 @@ galaxy_position_real	    galaxy_shear_plus_real	     galaxy_shear_xi     theta b
 galaxy_position_real        cmb_kappa_real               galaxy_cmbkappa_xi  theta bin_{0}_{1}
 cmb_kappa_real              cmb_kappa_real		         cmbkappa_xi         theta bin_{0}_{1}
 galaxy_shear_plus_real      cmb_kappa_real               shear_cmbkappa_xi   theta bin_{0}_{1}
+galaxy_shear_plus_real      psf_plus_real                tau_0_plus          theta bin_{0}_{1}
+galaxy_shear_plus_real      star_residual_plus_real      tau_2_plus          theta bin_{0}_{1}

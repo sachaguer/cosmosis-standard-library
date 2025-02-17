@@ -16,6 +16,8 @@ from collections import OrderedDict
 
 CL2XI_TYPES=["00","02+","22+","22-"]
 
+TAU_SECTION = ['tau_0_plus', 'tau_2_plus']
+
 """
 Class for interpolating spectra
 """
@@ -186,6 +188,13 @@ class TheorySpectrum(object):
             spectra[(i, j)] = block[section_name, bin_name]
 
         is_bin_averaged = block.get_bool(section_name, 'bin_avg', default=False)
+
+        #For the tau-statistics, no interpolation or averaging is required
+        if section_name in TAU_SECTION:
+            return TauStatTheorySpectrum(
+                spectrum_name, types, nbin_a, nbin_b, angles, spectra, is_auto,
+                auto_only=auto_only, bin_pairs=bin_pairs
+            )
 
         if is_bin_averaged:
             angle_edges = block[section_name, angle_name + "_edges"]
@@ -369,7 +378,7 @@ class InterpolatedTheorySpectrum(TheorySpectrum):
                 Tried to get theory prediction for {} {}, but ell or theta value ({}) was out of range.
                 "Maybe increase the range when computing/projecting or check units?""".format(
                     self.name, (bin1, bin2), angle))
-
+        
         return spec_sample, spline
 
 
@@ -387,6 +396,36 @@ class InterpolatedTheorySpectrum(TheorySpectrum):
         spec_vals = np.array([self.get_spectrum_value(bin1, bin2, a)[0] for a in angle])
         noise = self.get_noise_spec_values( bin1, bin2, angle )
         return spec_vals + noise
+
+class TauStatTheorySpectrum(TheorySpectrum):
+    is_bin_averaged = False
+    def __init__(self, name, types, nbin_a, nbin_b, angles, spectra, is_auto,
+        noise_var_per_mode=None, auto_only = False,  bin_pairs=None, ):
+
+        super(TauStatTheorySpectrum, self).__init__(
+            name, types, nbin_a, nbin_b, angles, spectra, is_auto,
+            noise_var_per_mode=noise_var_per_mode, auto_only = auto_only,  bin_pairs=bin_pairs)
+
+    def get_noise_spec_values( self, bin1, bin2, angle ):
+        raise NotImplementedError("get_noise_spec_values is not implemented for bin-averaged theory")
+
+    def get_spectrum_value(self, bin1, bin2, angle):
+        """
+        Function that returns the value for the model at some bins and 
+        particular angular scale. You can choose whether to interpolate the 
+        spectra in the block or not. 
+        bin1: redshift bin sample 1
+        bin2: redshift bin sample 2
+        angle: angular value in radians we want our corresponding model.
+        """
+
+        i, j = self.bin_pair_from_bin1_bin2(bin1, bin2)
+        bin_index = np.where(angle == self.angles)[0][0]
+        spectrum_value = self.spectra[(i,j)][bin_index]
+        angles = self.angles[bin_index]
+
+        # Also return the angle valuues
+        return spectrum_value, angles
 
 
 def cov2corr(cov):

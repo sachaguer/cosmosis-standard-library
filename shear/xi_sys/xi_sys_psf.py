@@ -17,7 +17,9 @@ def execute(block, config):
     #### !!! Will be updated to the tomographic case soon !!! ####
     rho_stats = config
 
-    alpha, beta = block["psf_leakage_parameters", 'alpha'], block["psf_leakage_parameters", 'beta']
+    alpha, beta = block["psf_leakage_parameters", "alpha"], block["psf_leakage_parameters", "beta"]
+
+    print(alpha, beta)
 
     xi_sys_p = (
         alpha**2*rho_stats["rho_0_p"]

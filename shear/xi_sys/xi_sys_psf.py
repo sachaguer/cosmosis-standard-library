@@ -19,8 +19,6 @@ def execute(block, config):
 
     alpha, beta = block["psf_leakage_parameters", "alpha"], block["psf_leakage_parameters", "beta"]
 
-    print(alpha, beta)
-
     xi_sys_p = (
         alpha**2*rho_stats["rho_0_p"]
         + beta**2*rho_stats["rho_1_p"]

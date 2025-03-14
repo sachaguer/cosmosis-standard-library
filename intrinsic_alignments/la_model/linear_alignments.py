@@ -105,6 +105,41 @@ def bridle_king_corrected(z_nl, k_nl, P_nl, A, Omega_m):
 
     return P_II, P_GI, b_I, r_I, k_nl, z_nl
 
+def z_NLA(z_nl, k_nl, P_nl, A, eta, Omega_m):
+    # Redshift dependant NLA model where amplitude of IA is a function of 
+    # [(1 + z)/(1 + z_pivot)]^{\eta_IA}, z_pivot set to fiducial value of 0.62 (2305.17137)
+    
+    z_pivot = 0.62
+    z0 = np.where(z_nl == 0)[0][0]
+    nz = len(z_nl)
+
+    ksmall = np.argmin(k_nl)
+
+    growth = (P_nl[:, ksmall] / P_nl[z0, ksmall])**0.5
+
+    F = - A * C1_RHOCRIT * Omega_m / growth
+    
+    z_dep_factor = ((1 + z_nl)/(1+z_pivot))**eta
+    
+    F *= z_dep_factor
+
+    # intrinsic-intrinsic term
+    P_II = np.zeros_like(P_nl)
+
+    for i in range(nz):
+        P_II[i, :] = F[i]**2 * P_nl[i, :]
+
+    P_GI = np.zeros_like(P_nl)
+    for i in range(nz):
+        P_GI[i] = F[i] * P_nl[i]
+
+    # Finally calculate the intrinsic and stochastic bias terms from the power spectra
+    R1 = P_II / P_nl
+    b_I = -1.0 * np.sqrt(R1) * np.sign(A)
+    r_I = P_GI / P_II * b_I
+
+    return P_II, P_GI, b_I, r_I, k_nl, z_nl
+
 
 def linear(z_lin, k_lin, P_lin, A, Omega_m):
     # What was used in CFHTLens and Maccrann et al.
